@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE handler</title>
+</head>
+<body>
+    <div>
+        <h1>Notify Server SSE Page</h1>
+    </div>
+    <script lang="javascript">
+        const accessToken = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MTk5MzE5NjgsImV4cCI6MTcyMDUzNjc2OCwibmJmIjoxNzE5OTMxOTY4LCJpc3MiOiJjaGF0X3NlcnZlciIsImF1ZCI6ImNoYXRfd2ViIiwiaWQiOjEsIndzX2lkIjowLCJmdWxsbmFtZSI6InN0YXJ0ZHVzayIsImVtYWlsIjoic3RhcnRkdXNrQGFjbWUub3JnIiwiY3JlYXRlZF9hdCI6IjIwMjQtMDYtMjNUMDY6MDU6MDQuMjAxMTE0WiJ9.OrhJVocWMwnElc8UrfIqp5L10Xj6EvUUQ5FxVUBiNhez5boEhsfVAa3OZ6z0q_PsILgnP6V-L2qGCndzSr7uBA'
+        const source = new EventSource(`/events?access_token=${accessToken}`)
+        source.onmessage = (event) => {
+            console.log("Got: ", event.data)
+        }
+        source.addEventListener('NewChat', (event) => {
+            console.log('NewChat:', event.data)
+        })
+        source.addEventListener('AddToChat', (event) => {
+            console.log('AddToChat:', event.data)
+        })
+        source.addEventListener('RemoveFromChat', (event) => {
+            console.log('RemoveFromChat:', event.data)
+        })
+        source.addEventListener('NewMessage', (event) => {
+            console.log('NewMessage:', event.data)
+        })
+    </script>
+</body>
+</html>
