@@ -1,0 +1,191 @@
+@baseUrl = http://localhost:6688
+
+### signup user
+POST {{baseUrl}}/api/signup
+Content-Type: application/json
+
+{
+    "workspace": "acme",
+    "fullname": "startdusk",
+    "email": "startdusk@acme.org",
+    "password": "password"
+}
+
+### signup user ben
+POST {{baseUrl}}/api/signup
+Content-Type: application/json
+
+{
+    "workspace": "acme",
+    "fullname": "ben",
+    "email": "ben@acme.org",
+    "password": "password"
+}
+
+### signup user john
+POST {{baseUrl}}/api/signup
+Content-Type: application/json
+
+{
+    "workspace": "acme",
+    "fullname": "john",
+    "email": "john@acme.org",
+    "password": "password"
+}
+
+### signup user panda
+POST {{baseUrl}}/api/signup
+Content-Type: application/json
+
+{
+    "workspace": "acme",
+    "fullname": "panda",
+    "email": "panda@acme.org",
+    "password": "password"
+}
+
+### signin user(valid)
+# @name signin
+POST {{baseUrl}}/api/signin
+Content-Type: application/json
+
+{
+    "email": "startdusk@acme.org",
+    "password": "password"
+}
+
+### auth token with startdusk
+@authToken = {{signin.response.body.$.token}}
+
+### signin user(valid)
+# @name signin1
+POST {{baseUrl}}/api/signin
+Content-Type: application/json
+
+{
+    "email": "ben@acme.org",
+    "password": "password"
+}
+
+### auth token with ben
+@authToken1 = {{signin1.response.body.$.token}}
+
+### signin user(invalid)
+POST {{baseUrl}}/api/signin
+Content-Type: application/json
+
+{
+    "email": "unknown@acme.org",
+    "password": "password"
+}
+
+### create chat with startdusk
+POST {{baseUrl}}/api/chats
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "name": "project X",
+    "members": [1, 2],
+    "public": false
+}
+
+### create direct chat with startdusk
+POST {{baseUrl}}/api/chats
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "members": [1, 2],
+    "public": false
+}
+
+### create chats without startdusk
+POST {{baseUrl}}/api/chats
+Content-Type: application/json
+Authorization: Bearer {{authToken1}}
+
+{
+    "name": "project Y",
+    "members": [2, 3],
+    "public": false
+}
+
+### create direct chat without startdusk
+POST {{baseUrl}}/api/chats
+Content-Type: application/json
+Authorization: Bearer {{authToken1}}
+
+{
+    "members": [2, 3],
+    "public": false
+}
+
+
+### get chat list
+GET {{baseUrl}}/api/chats
+Authorization: Bearer {{authToken}}
+
+
+### get user list
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{authToken}}
+
+### upload files
+POST {{baseUrl}}/api/upload
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="file"; filename="leetcode.png"
+Content-Type: application/octet-stream
+
+< leetcode.png
+--MyBoundary
+Content-Disposition: form-data; filename="hello.txt"
+Content-Type: text/plain
+
+Hello, World!
+--MyBoundary--
+
+### get files txt
+GET {{baseUrl}}/api/files/1/0a0/a9f/2a6772942557ab5355d76af442f8f65e01.txt
+Authorization: Bearer {{authToken}}
+
+### get files png
+GET {{baseUrl}}/api/files/1/1f5/80b/372d457f616afdc8d24f969966deb6dc17.png
+Authorization: Bearer {{authToken}}
+
+### send a message
+POST {{baseUrl}}/api/chats/1/messages
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "content": "Hello, World!",
+    "files": []
+}
+
+### get messages
+GET {{baseUrl}}/api/chats/1/messages?limit=6&last_id=10
+Authorization: Bearer {{authToken}}
+
+### use cloudflare AI
+@cfAccount = xxx
+@cfToken = xxx
+
+POST https://api.cloudflare.com/client/v4/accounts/{{cfAccount}}/ai/run/@cf/meta/llama-3-8b-instruct
+Authorization: Bearer {{cfToken}}
+
+{
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a friendly assistant that answers questions based on your knowledge. Your reply will be limited to 100 words. reply with simplified Chinese, unless the question asks for a specific language."
+        },
+        {
+            "role": "user",
+            "content": "中国上最长的河流是哪条？"
+        }
+    ]
+}

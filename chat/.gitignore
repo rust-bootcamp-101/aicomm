@@ -1,0 +1,8 @@
+/target
+
+.env
+chat_web/
+node_modules/
+.DS_Store
+leetcode.png
+index.html
