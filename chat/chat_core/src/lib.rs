@@ -1,6 +1,7 @@
 mod utils;
 
 pub mod middlewares;
+use thiserror::Error;
 pub use utils::*;
 
 use chrono::{DateTime, Utc};
@@ -51,6 +52,9 @@ pub struct Chat {
     pub name: Option<String>,
     pub r#type: ChatType,
     pub members: Vec<i64>,
+
+    pub agents: Vec<i64>,
+
     #[serde(alias = "createdAt")]
     pub created_at: DateTime<Utc>,
 }
@@ -77,10 +81,33 @@ pub struct Message {
     pub chat_id: i64,
     #[serde(alias = "senderId")]
     pub sender_id: i64,
+    pub modify_content: Option<String>,
     pub content: String,
     pub files: Vec<String>,
     #[serde(alias = "createdAt")]
     pub created_at: DateTime<Utc>,
+}
+
+#[allow(async_fn_in_trait)]
+pub trait Agen {
+    async fn process(&self, msg: Message, ctx: &AgentContext) -> Result<AgentDecision, AgentError>;
+}
+
+#[derive(Debug, Clone)]
+pub enum AgentDecision {
+    Modify(String),
+    Reply(String),
+    Delete,
+    None,
+}
+
+#[derive(Debug, Clone)]
+pub struct AgentContext {}
+
+#[derive(Error, Debug)]
+pub enum AgentError {
+    #[error("Network error: {0}")]
+    Network(String),
 }
 
 impl User {
