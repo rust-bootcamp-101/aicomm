@@ -123,6 +123,7 @@ impl ChatServer {
             .body(body)
             .send()
             .await?;
+        // dbg!(&res);
         assert_eq!(res.status(), StatusCode::OK);
         let ret: AuthToken = res.json().await?;
         self.token = ret.token;

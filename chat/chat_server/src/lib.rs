@@ -65,10 +65,10 @@ pub async fn get_router(state: AppState) -> Result<Router, AppError> {
         .allow_origin(cors::Any);
 
     let api = Router::new()
-        .route("/upload", post(upload_handler))
-        .route("/files/:ws_id/*path", get(file_handler))
         .route("/users", get(list_chat_users_handler))
         .nest("/chats", chats)
+        .route("/upload", post(upload_handler))
+        .route("/files/:ws_id/*path", get(file_handler))
         .layer(from_fn_with_state(state.clone(), verify_token::<AppState>))
         // routes doesn't need token verification
         .route("/signin", post(signin_handler))
@@ -80,8 +80,7 @@ pub async fn get_router(state: AppState) -> Result<Router, AppError> {
         .route("/", get(index_handler))
         .nest("/api", api)
         .with_state(state);
-    let app = set_layer(app);
-    Ok(app)
+    Ok(set_layer(app))
 }
 
 impl Deref for AppState {
