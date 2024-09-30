@@ -73,6 +73,33 @@ pub enum ChatType {
     PublicChannel,
 }
 
+#[derive(Debug, ToSchema, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, sqlx::Type)]
+#[sqlx(type_name = "agent_type", rename_all = "snake_case")]
+#[serde(rename_all(serialize = "camelCase"))]
+pub enum AgentType {
+    #[serde(alias = "proxy", alias = "Proxy")]
+    Proxy,
+    #[serde(alias = "reply", alias = "Reply")]
+    Reply,
+    #[serde(alias = "tap", alias = "Tap")]
+    Tap,
+}
+
+#[derive(Debug, Clone, FromRow, ToSchema, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all(serialize = "camelCase"))]
+pub struct ChatAgent {
+    pub id: i64,
+    pub chat_id: i64,
+    pub name: String,
+    pub r#type: AgentType,
+    pub prompt: String,
+    pub args: sqlx::types::Json<serde_json::Value>,
+    #[serde(alias = "createdAt")]
+    pub created_at: DateTime<Utc>,
+    #[serde(alias = "updatedAt")]
+    pub updated_at: DateTime<Utc>,
+}
+
 #[derive(Debug, ToSchema, Clone, PartialEq, Eq, FromRow, Serialize, Deserialize)]
 #[serde(rename_all(serialize = "camelCase"))]
 pub struct Message {
@@ -81,7 +108,7 @@ pub struct Message {
     pub chat_id: i64,
     #[serde(alias = "senderId")]
     pub sender_id: i64,
-    pub modify_content: Option<String>,
+    pub modified_content: Option<String>,
     pub content: String,
     pub files: Vec<String>,
     #[serde(alias = "createdAt")]
@@ -89,7 +116,7 @@ pub struct Message {
 }
 
 #[allow(async_fn_in_trait)]
-pub trait Agen {
+pub trait Agent {
     async fn process(&self, msg: Message, ctx: &AgentContext) -> Result<AgentDecision, AgentError>;
 }
 

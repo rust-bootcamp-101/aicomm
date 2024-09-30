@@ -16,6 +16,7 @@ INSERT INTO chats (ws_id, name, type, members) VALUES (1, 'general', 'public_cha
 -- insert unnamed chat
 INSERT INTO chats (ws_id, type, members) VALUES (1, 'single', '{1,2}'), (1, 'group', '{1,2,3}');
 
+
 -- insert messages
 INSERT INTO messages (chat_id, sender_id, content)
     VALUES (1, 1, 'Hello world!'), (1,2,'Hi, there'), (1,3,'How are you'), (1,4,'I am fine, thank you')
@@ -25,3 +26,7 @@ INSERT INTO messages (chat_id, sender_id, content)
     ,(1,3,'How are you doing?')
     ,(1,1,'Hheheh')
     ,(1,5,'fNooooooooooo!');
+
+-- insert agent to chat
+INSERT INTO chat_agents (chat_id, name, type, prompt, args)
+    VALUES (1, 'translation', 'proxy', 'If language is Chinese, translate to English. if language is English, translate to Chinese. Please reply with the translated content directly. No explanation is needed. Here is the content: ', '{}');
