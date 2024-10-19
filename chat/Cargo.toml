@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [ "chat_core", "chat_server", "chat_test", "notify_server"]
+members = [ "ai_sdk", "chat_core", "chat_server", "chat_test", "notify_server"]
 
 [workspace.dependencies]
 chat-core = { path = "./chat_core" }
