@@ -189,3 +189,32 @@ Authorization: Bearer {{cfToken}}
         }
     ]
 }
+
+
+### create chat agent
+POST {{baseUrl}}/api/chats/1/agents
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "name": "agent X3",
+    "type": "proxy",
+    "prompt": "You are a helpful assistant",
+    "args": {}
+}
+
+### update chat agent
+PATCH {{baseUrl}}/api/chats/1/agents
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "id": 4,
+    "prompt": "You are a helpful assistant but now is change",
+    "args": {}
+}
+
+### list chat agents
+GET {{baseUrl}}/api/chats/1/agents
+Content-Type: application/json
+Authorization: Bearer {{authToken}}

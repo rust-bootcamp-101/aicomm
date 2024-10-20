@@ -2,8 +2,8 @@ use std::{net::SocketAddr, time::Duration};
 
 use anyhow::Result;
 
-use chat_core::{Chat, ChatType, Message};
-use chat_server::{AppState, CreateChat, CreateMessage, SigninUser};
+use chat_core::{AgentType, Chat, ChatAgent, ChatType, Message};
+use chat_server::{AppState, CreateAgent, CreateChat, CreateMessage, SigninUser};
 use futures::StreamExt;
 use reqwest::{
     multipart::{Form, Part},
@@ -35,6 +35,7 @@ async fn chat_server_should_work() -> Result<()> {
     let chat_server = ChatServer::new(state).await?;
     NotifyServer::new(&db_url, &chat_server.token).await?;
     let chat = chat_server.create_chat().await?;
+    let _agent = chat_server.create_agent(chat.id as _).await?;
     let _msg = chat_server.create_message(chat.id as _).await?;
     tokio::time::sleep(Duration::from_secs(1)).await;
     Ok(())
@@ -151,6 +152,30 @@ impl ChatServer {
         assert_eq!(chat.members, vec![1, 2]);
         assert_eq!(chat.r#type, ChatType::PrivateChannel);
         Ok(chat)
+    }
+
+    async fn create_agent(&self, chat_id: u64) -> Result<ChatAgent> {
+        let body = serde_json::to_string(&CreateAgent::new(
+            "test",
+            AgentType::Proxy,
+            "You are a helpful assiatant",
+            serde_json::json!({}),
+        ))?;
+        let res = self
+            .client
+            .post(format!("http://{}/api/chats/{}/agents", self.addr, chat_id))
+            .header("Authorization", format!("Bearer {}", self.token))
+            .header("Content-Type", "application/json")
+            .body(body)
+            .send()
+            .await?;
+        assert_eq!(res.status(), StatusCode::CREATED);
+        let agent: ChatAgent = res.json().await?;
+        assert_eq!(agent.chat_id, chat_id as i64);
+        assert_eq!(agent.name, "test");
+        assert_eq!(agent.r#type, AgentType::Proxy);
+        assert_eq!(agent.prompt, "You are a helpful assiatant");
+        Ok(agent)
     }
 
     async fn create_message(&self, chat_id: u64) -> Result<Message> {

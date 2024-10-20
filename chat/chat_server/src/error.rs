@@ -45,6 +45,15 @@ pub enum AppError {
 
     #[error("{0}")]
     UnAuthorization(String),
+
+    #[error("user {user_id} is not member of chat {chat_id}")]
+    NotChatMemberError { user_id: u64, chat_id: u64 },
+
+    #[error("create agent error: {0}")]
+    CreateAgentError(String),
+
+    #[error("update agent error: {0}")]
+    UpdateAgentError(String),
 }
 
 impl ErrorOutput {
@@ -65,11 +74,14 @@ impl IntoResponse for AppError {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
             Self::EmailAlreadyExists(_) => StatusCode::CONFLICT,
-            Self::CreateChatError(_) | Self::CreateMessageError(_) | Self::ChatFileError(_) => {
-                StatusCode::BAD_REQUEST
-            }
+            Self::CreateChatError(_)
+            | Self::CreateMessageError(_)
+            | Self::ChatFileError(_)
+            | Self::CreateAgentError(_)
+            | Self::UpdateAgentError(_) => StatusCode::BAD_REQUEST,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::UnAuthorization(_) => StatusCode::UNAUTHORIZED,
+            Self::NotChatMemberError { .. } => StatusCode::FORBIDDEN,
         };
 
         (status, Json(ErrorOutput::new(self.to_string()))).into_response()

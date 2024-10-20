@@ -1,6 +1,7 @@
 mod utils;
 
 pub mod middlewares;
+
 use thiserror::Error;
 pub use utils::*;
 
@@ -59,10 +60,13 @@ pub struct Chat {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, ToSchema, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, sqlx::Type)]
+#[derive(
+    Debug, Default, ToSchema, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, sqlx::Type,
+)]
 #[sqlx(type_name = "chat_type", rename_all = "snake_case")]
 #[serde(rename_all(serialize = "camelCase"))]
 pub enum ChatType {
+    #[default]
     #[serde(alias = "single", alias = "Single")]
     Single,
     #[serde(alias = "group", alias = "Group")]
@@ -73,10 +77,13 @@ pub enum ChatType {
     PublicChannel,
 }
 
-#[derive(Debug, ToSchema, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, sqlx::Type)]
+#[derive(
+    Debug, Default, ToSchema, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, sqlx::Type,
+)]
 #[sqlx(type_name = "agent_type", rename_all = "snake_case")]
 #[serde(rename_all(serialize = "camelCase"))]
 pub enum AgentType {
+    #[default]
     #[serde(alias = "proxy", alias = "Proxy")]
     Proxy,
     #[serde(alias = "reply", alias = "Reply")]
@@ -89,6 +96,7 @@ pub enum AgentType {
 #[serde(rename_all(serialize = "camelCase"))]
 pub struct ChatAgent {
     pub id: i64,
+    #[serde(alias = "chatId")]
     pub chat_id: i64,
     pub name: String,
     pub r#type: AgentType,
