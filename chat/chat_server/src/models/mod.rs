@@ -1,16 +1,16 @@
+mod agent;
 mod chat;
 mod file;
 mod message;
 mod user;
-mod agent;
 mod workspace;
 
+pub use agent::*;
 pub use chat::*;
 #[allow(unused)]
 pub use file::*;
 pub use message::*;
 pub use user::*;
-pub use agent::*;
 
 use serde::{Deserialize, Serialize};
 
