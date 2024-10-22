@@ -1,4 +1,5 @@
 use axum::{extract::multipart, http::StatusCode, response::IntoResponse, Json};
+use chat_core::AgentError;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use utoipa::ToSchema;
@@ -54,6 +55,9 @@ pub enum AppError {
 
     #[error("update agent error: {0}")]
     UpdateAgentError(String),
+
+    #[error("ai agent error: {0}")]
+    AiAgentError(#[from] AgentError),
 }
 
 impl ErrorOutput {
@@ -70,7 +74,7 @@ impl IntoResponse for AppError {
             Self::PasswordHashError(_) | Self::HttpHeaderError(_) | Self::MultipartError(_) => {
                 StatusCode::UNPROCESSABLE_ENTITY
             }
-            Self::SqlxError(_) | Self::AnyError(_) | Self::IoError(_) => {
+            Self::SqlxError(_) | Self::AnyError(_) | Self::IoError(_) | Self::AiAgentError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
             Self::EmailAlreadyExists(_) => StatusCode::CONFLICT,

@@ -2,7 +2,7 @@ use std::{net::SocketAddr, time::Duration};
 
 use anyhow::Result;
 
-use chat_core::{AgentType, Chat, ChatAgent, ChatType, Message};
+use chat_core::{AdapterType, AgentType, Chat, ChatAgent, ChatType, Message};
 use chat_server::{AppState, CreateAgent, CreateChat, CreateMessage, SigninUser};
 use futures::StreamExt;
 use reqwest::{
@@ -158,6 +158,8 @@ impl ChatServer {
         let body = serde_json::to_string(&CreateAgent::new(
             "test",
             AgentType::Proxy,
+            AdapterType::Ollama,
+            "llama3.2",
             "You are a helpful assiatant",
             serde_json::json!({}),
         ))?;

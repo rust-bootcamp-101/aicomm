@@ -1,3 +1,4 @@
+mod agent;
 mod config;
 mod error;
 mod handlers;
@@ -5,12 +6,12 @@ mod middlewares;
 mod models;
 mod openapi;
 
-use axum::http::Method;
 pub use config::AppConfig;
 pub use error::AppError;
 pub use models::*;
 
 use anyhow::Context;
+use axum::http::Method;
 use chat_core::middlewares::{set_layer, verify_token, TokenVerify};
 use chat_core::{DecodingKey, EncodingKey, User};
 use handlers::*;

@@ -157,7 +157,7 @@ GET {{baseUrl}}/api/files/1/1f5/80b/372d457f616afdc8d24f969966deb6dc17.png
 Authorization: Bearer {{authToken}}
 
 ### send a message
-POST {{baseUrl}}/api/chats/1/messages
+POST {{baseUrl}}/api/chats/1
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -197,8 +197,10 @@ Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-    "name": "agent X3",
+    "name": "agent X",
     "type": "proxy",
+    "adapter": "ollama",
+    "model": "llama3.2",
     "prompt": "You are a helpful assistant",
     "args": {}
 }
@@ -209,8 +211,8 @@ Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-    "id": 4,
-    "prompt": "You are a helpful assistant but now is change",
+    "id": 3,
+    "prompt": "You're the world's best translator. You understand English and Chinese well, also their culture and idioms. You will translate user input between English and Chinese. If the original text is English, you will translate it to elegant, authentic Simplified Chinese. If the original text is Chinese, you will translate it to elegant, authentic English. Only return the translated sentences, no other text or comments. below are the text to translate:",
     "args": {}
 }
 
@@ -218,3 +220,24 @@ Authorization: Bearer {{authToken}}
 GET {{baseUrl}}/api/chats/1/agents
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
+
+
+### send a chinese message
+POST {{baseUrl}}/api/chats/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "content": "你好，今天工作辛苦了",
+    "files": []
+}
+
+### send a english message
+POST {{baseUrl}}/api/chats/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "content": "Well done! You made great progress today.",
+    "files": []
+}

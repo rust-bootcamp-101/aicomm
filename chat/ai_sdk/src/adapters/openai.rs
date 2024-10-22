@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-use crate::{AiService, Message};
+use crate::{AiAdapter, AiService, Message};
 
 pub struct OpenAIAdapter {
     host: String,
@@ -59,7 +59,7 @@ impl OpenAIAdapter {
     pub fn new(api_key: impl Into<String>, model: impl Into<String>) -> Self {
         Self {
             // host: "https://api.openai.com/v1".to_string(),
-            host: "https://api.chatanywhere.tech".to_string(),
+            host: "https://api.chatanywhere.tech".to_string(), // use for chinese
             api_key: api_key.into(),
             model: model.into(),
             client: Client::new(),
@@ -107,6 +107,12 @@ impl From<&Message> for OpenAIMessage {
             role: m.role.to_string(),
             content: m.content.clone(),
         }
+    }
+}
+
+impl From<OpenAIAdapter> for AiAdapter {
+    fn from(adapter: OpenAIAdapter) -> Self {
+        AiAdapter::OpenAI(adapter)
     }
 }
 

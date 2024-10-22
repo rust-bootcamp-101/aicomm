@@ -92,6 +92,20 @@ pub enum AgentType {
     Tap,
 }
 
+#[derive(
+    Debug, Default, ToSchema, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, sqlx::Type,
+)]
+#[sqlx(type_name = "adapter_type", rename_all = "snake_case")]
+#[serde(rename_all(serialize = "camelCase"))]
+pub enum AdapterType {
+    #[default]
+    #[serde(alias = "ollama", alias = "Ollama")]
+    Ollama,
+    #[sqlx(rename = "openai")]
+    #[serde(alias = "openai", alias = "OpenAI")]
+    OpenAI,
+}
+
 #[derive(Debug, Clone, FromRow, ToSchema, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all(serialize = "camelCase"))]
 pub struct ChatAgent {
@@ -100,8 +114,10 @@ pub struct ChatAgent {
     pub chat_id: i64,
     pub name: String,
     pub r#type: AgentType,
+    pub adapter: AdapterType,
+    pub model: String,
     pub prompt: String,
-    pub args: sqlx::types::Json<serde_json::Value>,
+    pub args: sqlx::types::Json<serde_json::Value>, // TODO: change to custom type
     #[serde(alias = "createdAt")]
     pub created_at: DateTime<Utc>,
     #[serde(alias = "updatedAt")]
@@ -125,7 +141,7 @@ pub struct Message {
 
 #[allow(async_fn_in_trait)]
 pub trait Agent {
-    async fn process(&self, msg: Message, ctx: &AgentContext) -> Result<AgentDecision, AgentError>;
+    async fn process(&self, msg: &str, ctx: &AgentContext) -> Result<AgentDecision, AgentError>;
 }
 
 #[derive(Debug, Clone)]
@@ -136,13 +152,16 @@ pub enum AgentDecision {
     None,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct AgentContext {}
 
 #[derive(Error, Debug)]
 pub enum AgentError {
     #[error("Network error: {0}")]
     Network(String),
+
+    #[error("{0}")]
+    AnyError(#[from] anyhow::Error),
 }
 
 impl User {

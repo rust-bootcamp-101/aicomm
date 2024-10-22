@@ -1,7 +1,7 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-use crate::{AiService, Message};
+use crate::{AiAdapter, AiService, Message};
 
 pub struct OllamaAdapter {
     host: String,
@@ -90,6 +90,12 @@ impl From<&Message> for OllamaMessage {
             role: m.role.to_string(),
             content: m.content.clone(),
         }
+    }
+}
+
+impl From<OllamaAdapter> for AiAdapter {
+    fn from(adapter: OllamaAdapter) -> Self {
+        AiAdapter::Ollama(adapter)
     }
 }
 

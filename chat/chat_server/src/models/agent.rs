@@ -1,4 +1,4 @@
-use chat_core::{AgentType, ChatAgent};
+use chat_core::{AdapterType, AgentType, ChatAgent};
 use serde::{Deserialize, Serialize};
 use tracing::info;
 use utoipa::ToSchema;
@@ -10,6 +10,8 @@ use crate::{AppError, AppState};
 pub struct CreateAgent {
     pub name: String,
     pub r#type: AgentType,
+    pub adapter: AdapterType,
+    pub model: String,
     pub prompt: String,
     #[serde(default = "default_map")] // 默认值为 {}
     pub args: serde_json::Value,
@@ -41,16 +43,19 @@ impl AppState {
             )));
         }
 
+        // TODO: check if model is supported by adapter
         let agent = sqlx::query_as(
             r#"
-            INSERT INTO chat_agents (chat_id, name, type, prompt, args)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO chat_agents (chat_id, name, type, adapter, model, prompt, args)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         "#,
         )
         .bind(chat_id as i64)
         .bind(input.name)
         .bind(input.r#type)
+        .bind(input.adapter)
+        .bind(input.model)
         .bind(input.prompt)
         .bind(input.args)
         .fetch_one(&self.pool)
@@ -162,12 +167,16 @@ impl CreateAgent {
     pub fn new(
         name: impl Into<String>,
         r#type: AgentType,
+        adapter: AdapterType,
+        model: impl Into<String>,
         prompt: impl Into<String>,
         args: impl Serialize,
     ) -> Self {
         Self {
             name: name.into(),
             r#type,
+            adapter,
+            model: model.into(),
             prompt: prompt.into(),
             args: serde_json::to_value(args).unwrap(),
         }
@@ -200,6 +209,8 @@ mod tests {
         let input = CreateAgent::new(
             "agent X1",
             AgentType::Proxy,
+            AdapterType::Ollama,
+            "llama3.2",
             "You are a helpful assistant",
             "{}",
         );
@@ -236,6 +247,8 @@ mod tests {
         let input = CreateAgent::new(
             "test agent",
             AgentType::Proxy,
+            AdapterType::Ollama,
+            "llama3.2",
             "You are a helpful assistant",
             "{}",
         );

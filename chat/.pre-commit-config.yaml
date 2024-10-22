@@ -55,7 +55,7 @@ repos:
       - id: cargo-test
         name: cargo test
         description: unit test for the project
-        entry: bash -c 'cargo nextest run --all-features'
+        entry: bash -c 'for dir in chat swiftide-pgvector chatapp/src-tauri; do (cd $dir && cargo nextest run --all-features -- --include-ignored) || exit 1; done'
         language: rust
         files: \.rs$
         pass_filenames: false
