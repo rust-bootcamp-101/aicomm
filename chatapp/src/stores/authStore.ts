@@ -79,6 +79,7 @@ export const useAuthStore = defineStore('authStore', {
         files: message.files,
         createdAt: message.createdAt,
         formattedCreatedAt: formatMessageDate(message.createdAt),
+        modifiedContent: message.modifiedContent,
       }));
       this.messages.set(channelId, formattedMessages.reverse())
     },
@@ -351,4 +352,3 @@ const getStoredUsers = (): Map<number, User> => {
   }
   return new Map()
 }
-

@@ -40,4 +40,5 @@ export type Message = {
   files: string[],
   createdAt: string,
   formattedCreatedAt: string,
+  modifiedContent: undefined | string
 }

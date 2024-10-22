@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUpdated, watch } from 'vue';
 import { useAuthStore } from '../stores/authStore';
+import { Message } from '../types';
 
 const authStore = useAuthStore()
 
 // computed
 const messages = computed(() => authStore.getMessagesForActiveChannel)
-const activeChannelId = computed(() => authStore.activeChannel && authStore.activeChannel.id) 
+const activeChannelId = computed(() => authStore.activeChannel && authStore.activeChannel.id)
 
 // watch
 watch(
@@ -37,6 +38,13 @@ const fetchMessages = (channelId: number) => {
 const getSender = (userId: number) => {
   return authStore.getUserById(userId)
 }
+const getMessageContent = (msg: Message) => {
+  if (msg.senderId === authStore.user!.id) {
+    return msg.content
+  } else {
+    return msg.modifiedContent && msg.modifiedContent.trim() !== '' ? msg.modifiedContent.trim(): msg.content
+  }
+}
 
 // hook
 onMounted(() => {
@@ -61,10 +69,9 @@ onUpdated(() => {
             <span class="font-bold mr-2">{{ getSender(message.senderId)?.fullname }}</span>
             <span class="text-xs text-gray-500">{{ message.formattedCreatedAt }}</span>
           </div>
-          <div class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.content }}</div>
+          <div class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ getMessageContent(message) }}</div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
