@@ -96,17 +96,16 @@ impl AppState {
                 .into_iter()
                 .find(|id| id != &(user_id as i64))
                 .expect("other user should exist");
-            let _ = sqlx::query_as(
+            sqlx::query(
                 r#"
-            INSERT INTO messages (chat_id, sender_id, content)
-            VALUES ($1, $2, $3)
-            RETURNING id
-        "#,
+                        INSERT INTO messages (chat_id, sender_id, content)
+                        VALUES ($1, $2, $3)
+                    "#,
             )
             .bind(chat_id as i64)
             .bind(other_user_id)
             .bind(reply)
-            .fetch_one(&self.pool)
+            .execute(&self.pool)
             .await?;
         }
 
