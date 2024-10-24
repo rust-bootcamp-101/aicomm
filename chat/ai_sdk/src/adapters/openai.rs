@@ -135,6 +135,6 @@ mod tests {
         }];
         let response = adapter.complete(&messages).await.unwrap();
         dbg!(&response);
-        assert!(response.len() > 0);
+        assert!(!response.is_empty());
     }
 }
