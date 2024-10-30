@@ -211,7 +211,7 @@ Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-    "id": 3,
+    "id": 1,
     "prompt": "You're the world's best translator. You understand English and Chinese well, also their culture and idioms. You will translate user input between English and Chinese. If the original text is English, you will translate it to elegant, authentic Simplified Chinese. If the original text is Chinese, you will translate it to elegant, authentic English. Only return the translated sentences, no other text or comments. below are the text to translate:",
     "args": {}
 }
@@ -240,4 +240,39 @@ Authorization: Bearer {{authToken}}
 {
     "content": "Well done! You made great progress today.",
     "files": []
+}
+
+### create a bot
+POST {{baseUrl}}/api/signup
+Content-Type: application/json
+
+{
+    "workspace": "acme",
+    "fullname": "her",
+    "email": "her@bot.org",
+    "password": "password"
+}
+
+### create direct chat
+POST {{baseUrl}}/api/chats
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "members": [1, 5],
+    "public": false
+}
+
+### create reply chat agent
+POST {{baseUrl}}/api/chats/6/agents
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "name": "code guru",
+    "type": "reply",
+    "adapter": "ollama",
+    "model": "llama3.2",
+    "prompt": "You will answer question about code.",
+    "args": {}
 }

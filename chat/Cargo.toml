@@ -1,12 +1,13 @@
 [workspace]
 resolver = "2"
-members = [ "ai_sdk", "chat_core", "chat_server", "chat_test", "notify_server"]
+members = [ "ai_sdk", "bot_server", "chat_core", "chat_server", "chat_test", "notify_server"]
 
 [workspace.dependencies]
 chat-core = { path = "./chat_core" }
 chat-server = { path = "./chat_server" }
 notify-server = { path = "./notify_server" }
 ai_sdk = { path = "./ai_sdk" }
+swiftide-pgvector = { path = "../swiftide-pgvector" }
 
 anyhow = "1.0.89"
 axum = { version = "0.7.7", features = ["http2", "query", "tracing", "multipart"] }

@@ -4,7 +4,7 @@ mod retrieve;
 use anyhow::Result;
 use derive_builder::Builder;
 use sqlx::PgPool;
-use swiftide_core::Persist;
+// use swiftide_core::Persist;
 
 #[derive(Debug, Builder, Clone)]
 pub struct PgVector {
@@ -29,7 +29,7 @@ impl PgVector {
             .pool(pool)
             .vector_size(vector_size as _)
             .build()?;
-        vector.setup().await?;
+        // vector.setup().await?;
         Ok(vector)
     }
 
