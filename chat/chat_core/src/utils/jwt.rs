@@ -1,7 +1,7 @@
 use crate::User;
 use jwt_simple::prelude::*;
 
-const JWT_DURATION: u64 = 60 * 60 * 24 * 7;
+const JWT_DURATION: u64 = 60 * 60 * 24 * 7; // 7 days
 const JWT_ISS: &str = "chat_server";
 const JWT_AUD: &str = "chat_web";
 
@@ -31,6 +31,8 @@ impl DecodingKey {
         let opts = VerificationOptions {
             allowed_issuers: Some(HashSet::from_strings(&[JWT_ISS])),
             allowed_audiences: Some(HashSet::from_strings(&[JWT_AUD])),
+            // time_tolerance 验证令牌时间戳时可容忍多少时钟漂移 默认值为 15 分钟，以解决时钟不完全准确的常见问题
+            // time_tolerance: Some(Duration::from_secs(10)), // 测试：这里我们修改为10s，为了快速让token过期
             ..Default::default()
         };
         let claims = self.0.verify_token::<User>(token, Some(opts))?;

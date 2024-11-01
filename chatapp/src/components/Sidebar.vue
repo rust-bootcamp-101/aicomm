@@ -71,7 +71,7 @@ onBeforeUnmount(() => {
     <div class="mb-6">
       <h2 class="text-xs uppercase text-gray-400 mb-2">Channels</h2>
       <ul>
-        <li v-for="channel in channels" :key="channel.id" @click="selectChannel(channel.id)"
+        <li v-for="channel of channels" :key="channel.id" @click="selectChannel(channel.id)"
             :class="['px-2 py-1 rounded cursor-pointer', { 'bg-blue-600': channel.id === activeChannelId }]">
           # {{ channel.name }}
         </li>

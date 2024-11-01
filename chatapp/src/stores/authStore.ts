@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('authStore', {
     channels: getStoredChannels(),       // List of channels
     messages: getStoredMessages(),       // Messages hashmap, keyed by channel ID
     users: getStoredUsers(),         // Users hashmap under workspace, keyed by user ID
-    activeChannel: null as Chat | null,
+    activeChannel: getActiveChannel(),
     sse: null as EventSource | null,
   }),
 
@@ -106,6 +106,7 @@ export const useAuthStore = defineStore('authStore', {
     setActiveChannel(channelId: number) {
       const channel = this.channels.find((c) => c.id === channelId)!;
       this.activeChannel = channel;
+      localStorage.setItem('activeChannelId', channelId.toString())
     },
 
     closeSSE() {
@@ -127,7 +128,6 @@ export const useAuthStore = defineStore('authStore', {
           },
         });
 
-        console.log(usersResp)
         const users: User[] = usersResp.data.map((user: any) => {
           return {
             id: user.id,
@@ -142,7 +142,6 @@ export const useAuthStore = defineStore('authStore', {
         users.forEach((u) => {
           usersMap.set(u.id, u)
         });
-        console.log(usersMap, JSON.stringify(Object.fromEntries(usersMap)))
 
         // fetch all my channels
         const chatsResp = await axios.get(`${getUrlBase()}/chats`, {
@@ -166,6 +165,7 @@ export const useAuthStore = defineStore('authStore', {
         this.setWorkspace(workspace)
         this.setChannels(channels)
         this.setUsers(usersMap)
+        this.activeChannel = getActiveChannel()
 
         // call initSSE action
         this.setSSE()
@@ -173,6 +173,9 @@ export const useAuthStore = defineStore('authStore', {
         return user;
       } catch (error) {
         console.error('Failed to load user state:', error);
+        if (failToAuthExpired(error)) {
+          this.logout()
+        }
         throw error;
       }
     },
@@ -237,6 +240,9 @@ export const useAuthStore = defineStore('authStore', {
           this.setMessages(channelId, messages)
         } catch (error) {
           console.error(`Failed to fetch messages for channel ${channelId}:`, error);
+          if (failToAuthExpired(error)) {
+            this.logout()
+          }
         }
       }
     },
@@ -252,6 +258,9 @@ export const useAuthStore = defineStore('authStore', {
         // commit('addMessage', { channelId: payload.chatId, message: response.data });
       } catch (error) {
         console.error('Failed to send message:', error);
+        if (failToAuthExpired(error)) {
+          this.logout()
+        }
         throw error;
       }
     },
@@ -302,6 +311,10 @@ export const useAuthStore = defineStore('authStore', {
   },
 });
 
+const failToAuthExpired = (err: any) => {
+  return err.response && err.response.status === 403
+}
+
 const getStoredUser = () => {
   const storedUser = localStorage.getItem('user');
   if (storedUser) {
@@ -351,4 +364,13 @@ const getStoredUsers = (): Map<number, User> => {
     return new Map<number, User>(Object.entries(parsedObject).map(([key, value]) => [Number(key), value]));
   }
   return new Map()
+}
+
+const getActiveChannel = (): Chat | null =>   {
+  const id = localStorage.getItem('activeChannelId');
+  console.log('activeChannelId', id)
+  const activeChannelId = id ? parseInt(id): 0
+
+  const channels = getStoredChannels()
+  return channels.find(c => c.id === activeChannelId) as Chat | null
 }
