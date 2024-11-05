@@ -1,6 +1,5 @@
 use axum::Router;
 
-use chat_core::{AgentType, Chat, ChatAgent, ChatType, Message, User, Workspace};
 use utoipa::{
     openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
     Modify, OpenApi,
@@ -9,10 +8,7 @@ use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{
-    error::ErrorOutput, handlers::*, AppState, CreateAgent, CreateChat, CreateMessage, CreateUser,
-    ListMessage, SigninUser, UpdateAgent,
-};
+use crate::{handler::*, AppState, ErrorOutput};
 
 pub(crate) trait OpenApiRouter {
     fn openapi(self) -> Self;
@@ -21,28 +17,16 @@ pub(crate) trait OpenApiRouter {
 #[derive(OpenApi)]
 #[openapi(
         paths(
-            signin_handler,
-            signup_handler,
-            create_chat_handler,
-            list_chat_handler,
-            get_chat_handler,
-            list_message_handler,
-
-            list_agent_handler,
-            create_agent_handler,
-            update_agent_handler
+            create_event_handler,
         ),
         modifiers(&SecurityAddon),
         components(
             schemas(
-                User, Message, Chat, ChatType, Workspace,
-                CreateChat, CreateMessage, CreateUser, ErrorOutput, AuthOutput,
-                ListMessage, SigninUser, AuthOutput,
-                CreateAgent, UpdateAgent, ChatAgent, AgentType
+                ErrorOutput
             )
         ),
         tags(
-            (name = "chat-server", description = "chat-server management API")
+            (name = "analytics-server", description = "analytics-server management API")
         )
     )]
 struct ApiDoc;

@@ -11,7 +11,7 @@ use tower_http::{
 };
 use tracing::Level;
 
-pub use auth::verify_token;
+pub use auth::{extract_user, verify_token};
 pub use request_id::*;
 pub use server_time::*;
 
