@@ -55,7 +55,7 @@ Content-Type: application/json
 }
 
 ### auth token with startdusk
-@authToken = {{signin.response.body.$.token}}
+@authToken = {{signin.response.body.token}}
 
 ### signin user(valid)
 # @name signin1
@@ -68,7 +68,7 @@ Content-Type: application/json
 }
 
 ### auth token with ben
-@authToken1 = {{signin1.response.body.$.token}}
+@authToken1 = {{signin1.response.body.token}}
 
 ### signin user(invalid)
 POST {{baseUrl}}/api/signin
@@ -140,7 +140,7 @@ Content-Type: multipart/form-data; boundary=MyBoundary
 Content-Disposition: form-data; name="file"; filename="leetcode.png"
 Content-Type: application/octet-stream
 
-< leetcode.png
+< ./fixtures/leetcode.png
 --MyBoundary
 Content-Disposition: form-data; filename="hello.txt"
 Content-Type: text/plain
@@ -276,3 +276,13 @@ Authorization: Bearer {{authToken}}
     "prompt": "You will answer question about code.",
     "args": {}
 }
+
+
+### send a event using protobuf(不知道为什么restclient不能发成功)
+curl -X POST http://localhost:6690/api/event \
+  -H "Content-Type: application/protobuf" \
+  -H "Authorization: Bearer {{authToken}}" \
+  -H "X-Country: China" \
+  -H "X-Region: Shanghai" \
+  -H "X-City: Shanghai" \
+  --data-binary @./fixtures/event.bin

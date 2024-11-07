@@ -1,16 +1,21 @@
 // TODO: check license for https://github.com/Stefanuk12/axum-protobuf
 // this is a modified version of the original code
 
+use std::convert::Infallible;
+
 use async_trait::async_trait;
 use axum::{
     body::Body,
-    extract::FromRequest,
-    http::{Request, StatusCode},
+    extract::{FromRequest, FromRequestParts},
+    http::{request::Parts, Request, StatusCode},
     response::{IntoResponse, Response},
 };
 use futures_util::StreamExt;
 
+use crate::pb::GeoLocation;
+
 pub struct Protobuf<T>(pub T);
+pub struct Geo(pub Option<GeoLocation>);
 
 #[allow(unused)]
 pub enum ProtobufRejection {
@@ -75,10 +80,33 @@ where
     }
 }
 
-// fn get_header_value(parts: &Parts, name: &str) -> Option<String> {
-//     parts
-//         .headers
-//         .get(name)
-//         .and_then(|v| v.to_str().ok())
-//         .map(|v| v.to_string())
-// }
+#[async_trait]
+impl<S> FromRequestParts<S> for Geo
+where
+    S: Send + Sync,
+{
+    type Rejection = Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        let country = get_header_value(parts, "x-country");
+        let region = get_header_value(parts, "x-region");
+        let city = get_header_value(parts, "x-city");
+
+        match (country, region, city) {
+            (Some(country), Some(region), Some(city)) => Ok(Geo(Some(GeoLocation {
+                country,
+                region,
+                city,
+            }))),
+            _ => Ok(Geo(None)),
+        }
+    }
+}
+
+fn get_header_value(parts: &Parts, name: &str) -> Option<String> {
+    parts
+        .headers
+        .get(name)
+        .and_then(|v| v.to_str().ok())
+        .map(|v| v.to_string())
+}

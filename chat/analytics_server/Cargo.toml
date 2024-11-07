@@ -33,4 +33,6 @@ prost-build = "0.13.3"
 proto-builder-trait = { version = "0.6.2", features = ["prost"] }
 
 [dev-dependencies]
+chrono.workspace = true
 clickhouse = { version = "0.13.1", features = ["rustls-tls", "time", "test-util"] }
+reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tls", "json"] }

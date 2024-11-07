@@ -18,8 +18,8 @@ trait EventConsume {
 pub struct AnalyticsEventRow {
     // EventContext fields
     pub client_id: String,
-    pub session_id: String,
-    pub duration: u32,
+    // pub session_id: String,
+    // pub duration: u32,
     pub app_version: String,
     pub system_os: String,
     pub system_arch: String,

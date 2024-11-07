@@ -1,6 +1,7 @@
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use tracing::warn;
 use utoipa::ToSchema;
 
 #[derive(Debug, ToSchema, Serialize, Deserialize)]
@@ -42,6 +43,8 @@ impl IntoResponse for AppError {
                 StatusCode::BAD_REQUEST
             }
         };
+        let msg = self.to_string();
+        warn!("Status {}, error: {}", status, msg);
 
         (status, Json(ErrorOutput::new(self.to_string()))).into_response()
     }
