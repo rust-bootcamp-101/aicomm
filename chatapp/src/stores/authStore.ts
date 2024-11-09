@@ -1,10 +1,15 @@
 import { defineStore } from 'pinia';
+import { v4 as uuidv4 } from 'uuid';
 import { formatMessageDate, getSseBase, getUrlBase } from '../utils';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { Chat, Message, User, Workspace } from '../types';
+import { sendAppExitEvent, sendAppStartEvent, sendChatCreatedEvent, sendChatJoinedEvent, sendChatLeftEvent, sendMessageSentEvent, sendNavigationEvent, sendUserLoginEvent, sendUserLogoutEvent, sendUserRegisterEvent } from '../analytics/event';
+import { AppExitEvent_ExitCode, EventContext } from '../gen/messages_pb';
+import packageJson from '../../package.json'
 
 interface State {
+    context: EventContext,
     user: User | null,         // User information
     token: string | null,        // Authentication token
     workspace: Workspace | null,      // Current workspace
@@ -17,6 +22,7 @@ interface State {
 
 export const useAuthStore = defineStore('authStore', {
   state: (): State => ({
+    context: getContext(),
     user: getStoredUser(),         // User information
     token: getStoredToken(),        // Authentication token
     workspace: getStoredWorkspace(),      // Current workspace
@@ -31,7 +37,8 @@ export const useAuthStore = defineStore('authStore', {
   actions: {
     setSSE() {
       const sseBase = getSseBase();
-      const url = `${sseBase}?access_token=${this.token}`;
+      const token = this.token || ''
+      const url = `${sseBase}?access_token=${token}`;
       const sse = new EventSource(url);
 
       sse.addEventListener("NewMessage", (e) => {
@@ -265,6 +272,37 @@ export const useAuthStore = defineStore('authStore', {
       }
     },
 
+    // events
+    async appStart() {
+      await sendAppStartEvent(this.context, this.token!)
+    },
+    async appExit(code: AppExitEvent_ExitCode) {
+      await sendAppExitEvent(this.context, this.token!, code)
+    },
+    async userLogin(email: string) {
+      await sendUserLoginEvent(this.context, this.token!, email)
+    },
+    async userLogout() {
+      await sendUserLogoutEvent(this.context, this.token!, this.user?.email!)
+    },
+    async userRegister(email: string, workspaceId: string) {
+      await sendUserRegisterEvent(this.context, this.token!, email, workspaceId)
+    },
+    async chatCreated(workspaceId: string) {
+      await sendChatCreatedEvent(this.context, this.token!, workspaceId)
+    },
+    async messageSend(chatId: string, type: string, size: number, totalFiles: number) {
+      await sendMessageSentEvent(this.context, this.token!, chatId, type, size, totalFiles)
+    },
+    async chatJoined(chatId: string) {
+      await sendChatJoinedEvent(this.context, this.token!, chatId)
+    },
+    async chatLeft(chatId: string) {
+      await sendChatLeftEvent(this.context, this.token!, chatId)
+    },
+    async navigation(from: string, to: string) {
+      await sendNavigationEvent(this.context, this.token!, from, to)
+    }
   },
 
   // Computed
@@ -315,7 +353,7 @@ const failToAuthExpired = (err: any) => {
   return err.response && err.response.status === 403
 }
 
-const getStoredUser = () => {
+const getStoredUser = (): User | null => {
   const storedUser = localStorage.getItem('user');
   if (storedUser) {
     return JSON.parse(storedUser) as User;
@@ -368,9 +406,61 @@ const getStoredUsers = (): Map<number, User> => {
 
 const getActiveChannel = (): Chat | null =>   {
   const id = localStorage.getItem('activeChannelId');
-  console.log('activeChannelId', id)
   const activeChannelId = id ? parseInt(id): 0
 
   const channels = getStoredChannels()
   return channels.find(c => c.id === activeChannelId) as Chat | null
+}
+
+// 获取 client id
+const getClientId = (): string => {
+  let clientId =  localStorage.getItem('clientId');
+  if (!clientId) {
+    clientId = uuidv4()
+    localStorage.setItem('clientId', clientId)
+  }
+  return clientId
+}
+
+export async function initPlatformInfo() {
+  const os = localStorage.getItem('os')
+  const arch = localStorage.getItem('arch')
+  if (!os || !arch) {
+    const info = await navigator.userAgentData?.getHighEntropyValues(["architecture"])
+    localStorage.setItem('os', info?.platform || '')
+    localStorage.setItem('arch', info?.architecture || '')
+  }
+}
+
+const getPlatformInfo = () => {
+  const os = localStorage.getItem('os') || ''
+  const arch = localStorage.getItem('arch') || ''
+  return {os, arch}
+}
+
+const getContext = (): EventContext => {
+  const user = getStoredUser()
+  let userId = ''
+  if (user) {
+    userId = user.id.toString()
+  }
+  const { os, arch } = getPlatformInfo()
+  const { userAgent, language } = navigator
+  return {
+    $typeName: 'analytics.EventContext',
+    clientId: getClientId(),
+    appVersion: packageJson.version, // 取package.json下的版本号
+    userId,
+    ip: '',
+    userAgent,
+    clientTs: BigInt((new Date()).getTime()),
+    serverTs: 0n,
+    system: {
+      $typeName: 'analytics.SystemInfo',
+      os,
+      arch,
+      locale: language,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    },
+  }
 }

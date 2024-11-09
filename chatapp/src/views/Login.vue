@@ -4,27 +4,28 @@ import {  ref } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 
-    const email = ref('');
-    const password = ref('');
-    const authStore = useAuthStore();
+const email = ref('');
+const password = ref('');
+const authStore = useAuthStore();
 
-    const router = useRouter();
+const router = useRouter();
 
-    const login = async () => {
-      const loginData = {
-        email: email.value.trim(),
-        password: password.value.trim()
-      }
-      if (!loginData.email || !loginData.password) {
-        return
-      }
-      try {
-        await authStore.signin(loginData)
-        router.push('/');
-      } catch (error) {
-        console.error(error)
-      }
-    };
+const login = async () => {
+  const loginData = {
+    email: email.value.trim(),
+    password: password.value.trim()
+  }
+  if (!loginData.email || !loginData.password) {
+    return
+  }
+  try {
+    await authStore.signin(loginData)
+    authStore.userLogin(loginData.email)
+    router.push('/');
+  } catch (error) {
+    console.error(error)
+  }
+};
 
 </script>
 

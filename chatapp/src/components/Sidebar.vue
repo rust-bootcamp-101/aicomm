@@ -18,6 +18,10 @@ const singleChannels = computed(() => authStore.getSingleChannels)
 // methods
 const toggleDropdown = () => dropdownVisible.value = !dropdownVisible.value
 const logout = () => {
+  const from = `/chats/${activeChannelId.value}`
+  const to = `/logout`
+  authStore.navigation(from, to)
+  authStore.userLogout()
   authStore.logout()
   router.push("/login")
 }
@@ -32,6 +36,9 @@ const addChannel = () => {
 }
 
 const selectChannel = (channelId: number) => {
+  const from = `/chats/${activeChannelId.value}`
+  const to = `/chats/${channelId}`
+  authStore.navigation(from, to)
   authStore.setActiveChannel(channelId)
 }
 

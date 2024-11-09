@@ -6,7 +6,7 @@ const authStore = useAuthStore()
 const message = ref("");
 
 // computed
-const activeChannelId = computed(() => authStore.activeChannel && authStore.activeChannel.id) 
+const activeChannelId = computed(() => authStore.activeChannel && authStore.activeChannel.id)
 
 
 // method
@@ -17,6 +17,9 @@ const sendMessage = async () => {
   }
 
   try {
+    const chatId = activeChannelId.value!;
+    // TODO: 上传文件待做
+    authStore.messageSend(chatId.toString(), '', 0, 0)
     authStore.sendMessage({chatId: activeChannelId.value!, content: msg})
     message.value = ''; // Clear the input after sending
   } catch (error) {

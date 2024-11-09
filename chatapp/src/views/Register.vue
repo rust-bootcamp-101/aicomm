@@ -21,6 +21,7 @@ const register = async () => {
   }
   try {
     await authStore.signup(registerData)
+    authStore.userRegister(registerData.email, registerData.workspace)
     router.push('/');
   } catch (error) {
     console.error('Signup failed:', error);
