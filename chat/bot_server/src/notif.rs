@@ -9,7 +9,7 @@ use sqlx::{
     PgPool,
 };
 use swiftide::{
-    integrations::ollama::Ollama,
+    integrations::openai::OpenAI,
     query::{
         answers::Simple,
         query_transformers::{Embed, GenerateSubquestions},
@@ -41,11 +41,15 @@ pub async fn setup_pg_listener(config: &AppConfig) -> Result<()> {
     let mut listener = PgListener::connect(db_url).await?;
     listener.listen("chat_message_created").await?;
     info!("Listening to chat_message_created");
-    let client = Ollama::default()
-        // ollama embed model: https://ollama.com/blog/embedding-models
-        .with_default_embed_model("mxbai-embed-large")
-        .with_default_prompt_model("llama3.2")
-        .to_owned();
+    // let client = Ollama::default()
+    //     // ollama embed model: https://ollama.com/blog/embedding-models
+    //     .with_default_embed_model("mxbai-embed-large")
+    //     .with_default_prompt_model("llama3.2")
+    //     .to_owned();
+    let client = OpenAI::builder()
+        .default_embed_model("text-embedding-3-small")
+        .default_prompt_model("gpt-4o-mini")
+        .build()?;
     let pool = PgPoolOptions::new().connect(db_url).await?;
     let bots = get_bots(&pool).await?;
     let mut stream = listener.into_stream();
