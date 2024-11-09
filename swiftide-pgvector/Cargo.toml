@@ -15,6 +15,6 @@ tracing = "0.1.40"
 
 [dev-dependencies]
 sqlx = { version = "0.8.2", features = ["postgres", "runtime-tokio", "tls-rustls"] }
-swiftide = { version = "0.13.4", features = ["fastembed", "ollama", "tree-sitter", "openai"] }
+swiftide = { version = "0.13.4", features = ["ollama", "tree-sitter", "openai"] }
 tokio = { version = "1.41.0", features = ["rt-multi-thread", "rt", "macros"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
