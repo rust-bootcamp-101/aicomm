@@ -14,7 +14,8 @@ const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 
-await initPlatformInfo()
 const authStore = useAuthStore()
-authStore.appStart()
+initPlatformInfo().then(() => {
+  authStore.appStart()
+})
 app.mount('#app');

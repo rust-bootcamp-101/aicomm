@@ -1,0 +1,6 @@
+server:
+  port: 6686
+  # 容器中访问主机 host network
+  #   - podman: host.containers.internal
+  #   - docker: host.docker.internal
+  db_url: postgres://postgres:postgres@host.containers.internal/chat

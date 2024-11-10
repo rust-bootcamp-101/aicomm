@@ -13,7 +13,9 @@ type Config = {
 let config: Config | null = null;
 try {
   if (invoke) {
-    config = await invoke('get_config') as Config;
+    invoke('get_config').then(c => {
+      config = c as Config
+    })
   }
 } catch (error) {
   console.warn('failed to get config: fallback');

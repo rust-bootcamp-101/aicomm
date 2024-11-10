@@ -1,17 +1,38 @@
+use axum::http::request::Parts;
+use chat_core::User;
 use clickhouse::Row;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     pb::{
         analytics_event::EventType, AnalyticsEvent, AppExitEvent, AppStartEvent, ChatCreatedEvent,
-        ChatJoinedEvent, ChatLeftEvent, EventContext, MessageSentEvent, NavigationEvent,
-        UserLoginEvent, UserLogoutEvent, UserRegisterEvent,
+        ChatJoinedEvent, ChatLeftEvent, EventContext, GeoLocation, MessageSentEvent,
+        NavigationEvent, UserLoginEvent, UserLogoutEvent, UserRegisterEvent,
     },
     AppError,
 };
 
 trait EventConsume {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError>;
+}
+
+impl AnalyticsEventRow {
+    pub fn update_with_server_info(&mut self, parts: &Parts, geo: Option<GeoLocation>) {
+        if let Some(user) = parts.extensions.get::<User>() {
+            self.user_id = Some(user.id.to_string());
+        } else {
+            self.user_id = None;
+        }
+        if let Some(geo) = geo {
+            self.geo_city = Some(geo.city);
+            self.geo_country = Some(geo.country);
+            self.geo_region = Some(geo.region);
+        } else {
+            self.geo_city = None;
+            self.geo_country = None;
+            self.geo_region = None;
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Row, Serialize, Deserialize)]
